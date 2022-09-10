@@ -19,12 +19,17 @@ val localGitCommit: String = try {
     "n/a"
 }
 
+javafx {
+    modules("javafx.base")
+}
+
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.ajoberstar.grgit") version "4.1.0"
     kotlin("jvm") version "1.3.72"
     kotlin("plugin.lombok") version "1.5.21"
+    id("org.openjfx.javafxplugin") version "0.0.13"
     application
 }
 
@@ -51,6 +56,7 @@ dependencies {
     implementation(group = "com.google.inject", name = "guice", version = "5.0.1")
     implementation(group = "com.jakewharton.rxrelay3", name = "rxrelay", version = "3.0.1")
     implementation(group = "com.squareup.okhttp3", name = "okhttp", version = "4.9.1")
+
     implementation(group = "io.reactivex.rxjava3", name = "rxjava", version = "3.1.2")
     implementation(group = "org.jgroups", name = "jgroups", version = "5.2.2.Final")
     implementation(group = "net.java.dev.jna", name = "jna", version = "5.9.0")

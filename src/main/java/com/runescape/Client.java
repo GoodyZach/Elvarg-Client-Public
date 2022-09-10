@@ -20,6 +20,7 @@ import com.runescape.cache.graphics.widget.Bank.BankTabShow;
 import com.runescape.cache.graphics.widget.OSRSCreationMenu;
 import com.runescape.cache.graphics.widget.SettingsWidget;
 import com.runescape.cache.graphics.widget.Widget;
+import com.runescape.cinematic.CinematicScene;
 import com.runescape.collection.Deque;
 import com.runescape.collection.Linkable;
 import com.runescape.draw.AbstractRasterProvider;
@@ -910,6 +911,7 @@ public class Client extends GameEngine implements RSClient {
             }
             SceneGraph.buildVisibilityMap(500, 800, instance.getViewportWidth(), instance.getViewportHeight(), ai);
         }
+        instance.cinematicScene.resizeFade();
 
     }
 
@@ -4231,6 +4233,8 @@ public class Client extends GameEngine implements RSClient {
         processOnDemandQueue();
     }
 
+    public CinematicScene cinematicScene;
+
     protected void startUp() {
         setGameState(GameState.LOADING);
 
@@ -4240,6 +4244,7 @@ public class Client extends GameEngine implements RSClient {
                 indices[i] = new FileStore(SignLink.cache_dat, SignLink.indices[i], i + 1);
         }
         try {
+            cinematicScene = new CinematicScene(this);
          //   requestCRCs();
           /*  if (Configuration.JAGCACHED_ENABLED) {
                 JagGrab.onStart();
@@ -4284,6 +4289,7 @@ public class Client extends GameEngine implements RSClient {
             resourceProvider = new ResourceProvider();
             resourceProvider.initialize(streamLoader_6, this);
             Model.init();
+            cinematicScene.prepareLoginScene();
             drawLoadingText(80, "Unpacking media");
 
             if(Configuration.repackIndexOne) {
@@ -4420,6 +4426,7 @@ public class Client extends GameEngine implements RSClient {
                 minimapLeft[l6 - 1] = j7 - 24;
                 minimapLineWidth[l6 - 1] = l7 - j7;
             }
+            cinematicScene.prepareLoginScene();
             setBounds();
             MessageCensor.load(wordencArchive);
             mouseDetection = new MouseDetection(this);
@@ -4431,7 +4438,7 @@ public class Client extends GameEngine implements RSClient {
             loadPlayerData();
 
             setGameState(GameState.LOGIN_SCREEN);
-            
+            gameLoaded = true;
             return;
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -4439,6 +4446,8 @@ public class Client extends GameEngine implements RSClient {
         }
         loadingError = true;
     }
+
+    public static boolean gameLoaded;
     
     public void requestCRCs() {
         for (int i = 0; i < CRCs.length; i++) {
@@ -12888,9 +12897,10 @@ public class Client extends GameEngine implements RSClient {
     private boolean rememberMe = true;
 
     private void drawLoginScreen() {
+        cinematicScene.render();
 
         //Draw bg
-        spriteCache.lookup(339).drawAdvancedSprite(0, 0);
+        //spriteCache.lookup(339).drawAdvancedSprite(0, 0);
 
         //newBoldFont.drawBasicString("MouseX: "+MouseHandler.mouseX+", MouseY: "+MouseHandler.mouseY, 20, 200);
 
@@ -15541,7 +15551,34 @@ public class Client extends GameEngine implements RSClient {
         Rasterizer2D.drawTransparentBoxOutline(x, y, 10, 10, 0xffff00, 255);
         newSmallFont.drawCenteredString("(" + (x + 4) + ", " + (y + 4) + ")", x + 4, y - 1, 0xffff00, 0);
     }
-    
+
+    public void processLoginOnDemandQueue() {
+        do {
+            Resource resource;
+            do {
+                resource = resourceProvider.next();
+                if (resource == null)
+                    return;
+                if (resource.dataType == 0) {
+                    Model.method460(resource.buffer, resource.ID);
+                    if (backDialogueId != -1)
+                        updateChatbox = true;
+                }
+                if (resource.dataType == 1) {
+                    Frame.load(resource.ID, resource.buffer);
+                }
+                if (resource.dataType == 2 && resource.ID == nextSong
+                        && resource.buffer != null)
+                    saveMidi(fadeMusic, resource.buffer);
+                if (resource.dataType == 3) {
+                    cinematicScene.provideMap(resource);
+                }
+            } while (resource.dataType != 93
+                    || !resourceProvider.landscapePresent(resource.ID));
+            //  MapRegion.passiveRequestGameObjectModels(new Buffer(resource.buffer), resourceProvider);
+        } while (true);
+    }
+
     private void processOnDemandQueue() {
         do {
             Resource resource;
