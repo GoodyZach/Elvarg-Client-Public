@@ -40,6 +40,7 @@ dependencies {
     compileOnly(group = "org.projectlombok", name = "lombok", version = Project.lombokVersion)
     compileOnly(group = "net.runelite", name = "orange-extensions", version = "1.0")
 
+    implementation("com.badlogicgames.jamepad:jamepad:2.0.20.0")
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.9")
     implementation(group = "com.google.code.gson", name = "gson", version = "2.8.5")
     implementation(group = "com.google.guava", name = "guava", version = "30.1.1-jre") {

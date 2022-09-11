@@ -22,6 +22,7 @@ import com.runescape.cache.graphics.widget.SettingsWidget;
 import com.runescape.cache.graphics.widget.Widget;
 import com.runescape.collection.Deque;
 import com.runescape.collection.Linkable;
+import com.runescape.controller.ControllerTest;
 import com.runescape.draw.AbstractRasterProvider;
 import com.runescape.draw.Rasterizer2D;
 import com.runescape.draw.Rasterizer3D;
@@ -662,8 +663,8 @@ public class Client extends GameEngine implements RSClient {
     private byte[][] terrainData;
     private int anInt1184;
     private int cameraHorizontal;
-    private int anInt1186;
-    private int anInt1187;
+    public int anInt1186;
+    public int anInt1187;
     private int overlayInterfaceId;
     private int[] anIntArray1190;
     private int[] anIntArray1191;
@@ -1000,6 +1001,7 @@ public class Client extends GameEngine implements RSClient {
     }
 
     public static void setTab(int id) {
+
         tabId = id;
         tabAreaAltered = true;
     }
@@ -4231,9 +4233,11 @@ public class Client extends GameEngine implements RSClient {
         processOnDemandQueue();
     }
 
+    ControllerTest ct = new ControllerTest();
+
     protected void startUp() {
         setGameState(GameState.LOADING);
-
+        ct.init();
         drawLoadingText(20, "Starting up");
         if (SignLink.cache_dat != null) {
             for (int i = 0; i < 5; i++)
@@ -5114,7 +5118,7 @@ public class Client extends GameEngine implements RSClient {
     private void mainGameProcessor() {
         callbacks.tick();
         callbacks.post(new ClientTick());
-       
+        ct.onGameLoop();
         if (systemUpdateTime > 1) {
             systemUpdateTime--;
         }
